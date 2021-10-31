@@ -31,7 +31,33 @@ First, create a FrameTimer instance somewhere convenient (perhaps as a member va
 Cybergem::FFrameTimer FrameTimer;
 ```
 
-Then simply feed it the number of frames to delay function execution for, and a lambda expression:
+By default, FrameTimer does not start ticking immediately after construction, in order to prevent it from ticking in things like CDOs, but FrameTimer needs to tick each frame in order to do its work, and there are two ways to go about it.
+
+The first way is to call StartTicking() on FrameTimer once you want it to start doing work. It's best to do this somewhere like in an AActor's BeginPlay() rather than in its constructor (which could cause FrameTimer to tick in a CDO), so that it won't begin ticking until gameplay starts:
+
+```cpp
+void AFooActor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// FrameTimer will now tick on its own
+	FrameTimer.StartTicking();
+}
+```
+
+The second way is to tick FrameTimer manually inside of the Tick() of another object. This can be useful if you need to ensure that the functions queued in FrameTimer execute in their respective frames before certain other logic is executed (since the Tick() order of objects is not always known or guaranteed):
+
+```cpp
+void AFooActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Manually tick FrameTimer
+	FrameTimer.Tick(DeltaTime);
+}
+```
+
+Then, simply feed FrameTimer the number of frames to delay function execution for, and a lambda expression:
 
 ```cpp
 // This function will execute after 60 frames have elapsed, printing a debug message

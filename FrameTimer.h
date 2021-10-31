@@ -108,28 +108,36 @@ class FFrameTimer
 {
 public:
 
-	FFrameTimer()
-	{
-		// Register tick
-		TickDelegate = FTickerDelegate::CreateRaw(this, &FFrameTimer::TimerTick);
-		TickDelegateHandle = FTicker::GetCoreTicker().AddTicker(TickDelegate);
-	}
+	FFrameTimer() : bTickRegistered(false) {}
 
 	~FFrameTimer()
 	{
-		// Unregister tick
-		FTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
+		if (bTickRegistered)
+		{
+			FTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
+		}
 	}
 
-	// Must return true in order to continue being ticked
-	bool TimerTick(float DeltaTime)
+	void StartTicking()
 	{
-		// Don't tick if there's no work to do
-		if (AllTimersDone())
+		if (!bTickRegistered)
+		{
+			bTickRegistered = true;
+			TickDelegate = FTickerDelegate::CreateRaw(this, &FFrameTimer::Tick);
+			TickDelegateHandle = FTicker::GetCoreTicker().AddTicker(TickDelegate);
+		}
+	}
+
+	// Must return true in order to continue being ticked by CoreTicker
+	bool Tick(float DeltaTime)
+	{
+		// Don't tick if there's no work to do, or if already ticked this frame
+		if (AllTimersDone() || LastTickFrame == GFrameCounter)
 		{
 			return true;
 		}
 
+		LastTickFrame = GFrameCounter;
 		TArray<int32> DeadPayloads;
 
 		// Not iterating over array backwards here so that the order
@@ -198,6 +206,8 @@ protected:
 
 private:
 
+	bool bTickRegistered;
+	uint64 LastTickFrame;
 	FTickerDelegate TickDelegate;
 	FDelegateHandle TickDelegateHandle;
 
