@@ -1,10 +1,14 @@
-// Copyright 2021 CYBERGEM CORPORATION [WWW.CYBERGEM.NET]
+// COPYRIGHT 2021 CYBERGEM CORPORATION [WWW.CYBERGEM.NET]
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include <functional>
+#include "Containers/Ticker.h"
 
+//
+//	UNREAL FRAME TIMER
+//
 
 namespace Cybergem {
 
