@@ -118,7 +118,11 @@ public:
 	{
 		if (bTickRegistered)
 		{
+#if ENGINE_MAJOR_VERSION >= 5
+			FTSTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
+#else
 			FTicker::GetCoreTicker().RemoveTicker(TickDelegateHandle);
+#endif
 		}
 	}
 
@@ -128,7 +132,11 @@ public:
 		{
 			bTickRegistered = true;
 			TickDelegate = FTickerDelegate::CreateRaw(this, &FFrameTimer::Tick);
+#if ENGINE_MAJOR_VERSION >= 5
+			TickDelegateHandle = FTSTicker::GetCoreTicker().AddTicker(TickDelegate);
+#else
 			TickDelegateHandle = FTicker::GetCoreTicker().AddTicker(TickDelegate);
+#endif
 		}
 	}
 
@@ -213,7 +221,11 @@ private:
 	bool bTickRegistered;
 	uint64 LastTickFrame;
 	FTickerDelegate TickDelegate;
+#if ENGINE_MAJOR_VERSION >= 5
+	FTSTicker::FDelegateHandle TickDelegateHandle;
+#else
 	FDelegateHandle TickDelegateHandle;
+#endif
 
 	template <typename... Args>
 	void Create_Internal(uint64 FrameDelay, std::function<void(Args...)> Func)
