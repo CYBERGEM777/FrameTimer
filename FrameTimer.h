@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include <functional>
 #include "Containers/Ticker.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 //
 //	UNREAL FRAME TIMER
